@@ -1,0 +1,122 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="h2">
+                Управление бронированием
+            </h2>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card" style="width: 18rem;">
+                <div class="card-header">
+                    Добавление бронирования
+                </div>
+                <div class="card-body mx-3 my-3">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#reservation_t_add_modal">
+                        Добавить бронь
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        <div class="col">
+            <div class="card" style="width: 18rem;">
+                <div class="card-header">
+                    Просмотр бронирований
+                </div>
+                <div class="card-body mx-sm-3 my-3">
+                    <form class="form-inline" id="reservation_t_show_form">
+                        <input type="hidden" name="reservation_t" value="true">
+                        <input type="hidden" name="event" value="show">
+
+                        <div class="form-group mb-2">
+                            <label for="date" class="sr-only">Date</label>
+                            <input type="date" name="date" class="form-control" id="date" placeholder="Date" value="">
+                        </div>
+                        <!-- <button type="submit" class="btn btn-primary mb-2">Показать датy</button> -->
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h2 class="h2">
+                Забронированное время
+            </h2>
+        </div>
+        <div class="col-12">
+            <form class="form" id="reservation_t_edit_form">
+                <input type="hidden" name="reservation_t" value="true">
+                <input type="hidden" name="event" value="edit">
+                <input type="hidden" name="date" value="">
+
+                <div class="form-group mx-sm-3 mb-2 text-center">
+                    <div class="form-check">
+                        <input name="fullday" class="form-check-input" type="checkbox" id="fullday" value="-1">
+                        <label class="form-check-label" for="fullday">
+                          Весь день
+                        </label>
+                      </div>
+                </div>
+
+                <ul class="list-group" id="reservation_t_show_result">
+                    <!-- <li class="list-group-item">An item</li> -->
+                </ul>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modals">
+    <div class="modal fade" id="reservation_t_add_modal" tabindex="-1" aria-labelledby="reservation_t_addLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+
+            <form class="modal-content" id="reservation_t_add_form">
+                <input type="hidden" name="reservation_t" value="true">
+                <input type="hidden" name="event" value="add">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reservation_t_addLabel">Добавление бронирования</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mx-sm-3 mb-2">
+                        <label for="date" class="sr-only">Дата</label>
+                        <input type="date" name="date" class="form-control" id="date" placeholder="Date">
+                    </div>
+                    <div class="form-group mx-sm-3 mb-2">
+                        <label for="hour" class="sr-only">Час</label>
+                        <input type="text" name="hour" class="form-control" id="hour" placeholder="Hour">
+                    </div>
+                    <!-- <div class="form-group mx-sm-3 mb-2">
+                        <label for="place" class="sr-only">Место</label>
+                        <input type="text" name="place" class="form-control" id="place" placeholder="Place">
+                    </div> -->
+                    <div class="form-group mx-sm-3 mb-2 text-center">
+                        <div class="form-check">
+                            <input name="fullday" class="form-check-input" type="checkbox" id="modal_fullday">
+                            <label class="form-check-label" for="modal_fullday">
+                              Весь день
+                            </label>
+                          </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Забронировать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    [[$reservation_t_js]]
+</script>
