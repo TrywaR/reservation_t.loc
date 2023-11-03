@@ -18,6 +18,7 @@
 `#reservation_t_show_form` - Форма для вывода данных по фильру (дате)
 `#reservation_t_add_form` - Форма для добавления данных
 `#reservation_t_edit_form` - Форма для редактирования, в которой содержится содержание
+`#reservation_t_show_result` - Вывод дат
 
 - Вывод данных
 `#reservation_t_input` - Поле ввода даты для бронирования (Должен иметь класс .datepicker для датапикера)

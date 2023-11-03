@@ -23,6 +23,20 @@ $(function () {
             return formattedDate
         }
 
+        this.get_convert_date = function(originalDate=''){
+            // Исходная дата в формате "16/11/2023"
+            // var originalDate = "16/11/2023";
+
+            // Разделение исходной даты на составляющие
+            var parts = originalDate.split('/')
+
+            // Создание новой даты в формате "n-j-Y"
+            var formattedDate = parts[2] + "-" + parts[1] + "-" + parts[0]
+
+            // Вывод отформатированной даты
+            return formattedDate
+        }
+
         // Вывод данных.
         this.show = function (oData) {
             var oReservationTThis = this
@@ -73,6 +87,17 @@ $(function () {
                 dataType: 'json',
             }).done(function (oData) {
                 $('#reservation_t_add_modal').modal('hide')
+            }).fail(function (jqXHR, textStatus) {
+                var sTextError = 'Error'
+                if ( typeof jqXHR.responseJSON.error != 'undefined' )
+                sTextError = jqXHR.responseJSON.error
+                alert(sTextError)
+                // if (jqXHR.status == 200) alert('Error')
+                // else {
+                //     if ($(oElem).attr('name') == 'fullday') {
+                //         oReservationTThis.days_disabled(0)
+                //     }
+                // }
             })
         }
 
@@ -95,13 +120,17 @@ $(function () {
                     }
                 }
 
-            }).fail(function (jqXHR, textStatus) {
-                if (jqXHR.status != 200) alert('Error')
-                else {
-                    if ($(oElem).attr('name') == 'fullday') {
-                        oReservationTThis.days_disabled(0)
-                    }
-                }
+            }).fail(function (jqXHR, textStatus,tes) {
+                var sTextError = 'Error'
+                if ( typeof jqXHR.responseJSON.error != 'undefined' )
+                sTextError = jqXHR.responseJSON.error
+                alert(sTextError)
+                // if (jqXHR.status == 200) alert('Error')
+                // else {
+                //     if ($(oElem).attr('name') == 'fullday') {
+                //         oReservationTThis.days_disabled(0)
+                //     }
+                // }
             })
         }
 
@@ -146,8 +175,7 @@ $(function () {
 
                 if (typeof oData.data != 'undefined') {
                     $.each(oData.data, function (iIndex, oElem) {
-                        sResult = '<option value="' + oElem.hour + '>' + oElem.hour + '</option>'
-
+                        sResult = '<option value="' + oElem.hour + '">' + oElem.hour + '</option>'
                         $(document).find('#reservation_t_result').append(sResult)
                     })
                 }
@@ -167,7 +195,6 @@ $(function () {
                 url: '/reservation_t/',
                 data: {
                     'reservation_t': true,
-                    'date': true,
                     'event': 'show_disabled_days',
                 },
                 dataType: 'json',
@@ -183,15 +210,15 @@ $(function () {
 
             if (!$(document).find('#reservation_t_input').hasClass('datepicker')) {
                 $(document).find('#reservation_t_input').on('change', function (event) {
-                    console.log('change')
+                    var sDate = ''
 
                     if ($(document).find('#reservation_t_result').length) {
-                        var sDate = $(this).find('[name=date]').val()
+                        var sDate = $(document).find('#reservation_t_input').val()
                     }
 
                     oReservationTThis.options({
                         'reservation_t': true,
-                        'date': sDate,
+                        'date': oReservationTThis.get_convert_date(sDate),
                         'event': 'options',
                     })
                 })
@@ -200,7 +227,6 @@ $(function () {
             }
             // ___
             // Заблоченные даты
-            console.log(oReservationTThis.arrDisabledDays)
             var disabledDays = oReservationTThis.arrDisabledDays
 
             //исправление бага со временем, последний час брони 22:30
@@ -259,14 +285,24 @@ $(function () {
                 dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
                 weekHeader: 'Нед',
                 onSelect: function (dateText, inst) {
+                    // Смена даты и показ свободного времени
                     oReservationTThis.options({
                         'reservation_t': true,
-                        'date': dateText,
+                        'date': oReservationTThis.get_convert_date(dateText),
                         'event': 'options',
                     })
                   }
             })
             $(".datepicker").datepicker('setDate', new Date())
+
+            // Первый показ возможного времени
+            var sDate = $(document).find('#reservation_t_input').val()
+
+            oReservationTThis.options({
+                'reservation_t': true,
+                'date': oReservationTThis.get_convert_date(sDate),
+                'event': 'options',
+            })
 
         }
 
@@ -296,7 +332,8 @@ $(function () {
             }
 
             // АДМИНКА
-            if (!$(document).find('#reservation_t_edit_form').length) {
+            // Смена даты
+            if ($(document).find('#reservation_t_edit_form').length) {
                 $(document).on('change', '#reservation_t_edit_form input', function (event) {
                     event.preventDefault()
 

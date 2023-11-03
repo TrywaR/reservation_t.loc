@@ -168,15 +168,16 @@ if (true) {
                         'place' => '0',
                     );
 
-                    // Если добавлять ещё пол часа
-                    if ((int)$this->fHourInterval) {
-                        $arrResult[$iCurrentHour . '.3'] = array(
-                            'id' => 0,
-                            'hour' => $iCurrentHour . '.3',
-                            'date' => $sDate,
-                            'place' => '0',
-                        );
-                    }
+                    if ($iCurrentHour != $this->dHourWorkStop)
+                        // Если добавлять ещё пол часа
+                        if ((int)$this->fHourInterval) {
+                            $arrResult[$iCurrentHour . '.3'] = array(
+                                'id' => 0,
+                                'hour' => $iCurrentHour . '.3',
+                                'date' => $sDate,
+                                'place' => '0',
+                            );
+                        }
 
                     $iCurrentHour++;
                 }
@@ -203,9 +204,6 @@ if (true) {
 
             function add(): bool | int
             {
-                global $modx;
-                // Пользователь не авторизирован, ошибка
-                if (!$modx->user->isAuthenticated()) return false;
                 $sQuery = " INSERT INTO `$this->sTableName` (`id`, `date`, `hour`, `place`) VALUES (NULL, '$this->date', '$this->hour', '$this->place'); ";
                 $iId = $this->insert($sQuery);
                 if ($iId) return $iId;
@@ -214,8 +212,6 @@ if (true) {
 
             function del(Int $sId = 0): bool
             {
-                global $modx;
-                if (!$modx->user->isAuthenticated()) return false;
                 $sQuery = " DELETE FROM `$this->sTableName` WHERE `id` = $sId ";
 
                 if (!$this->query($sQuery)) return true;
@@ -301,19 +297,39 @@ if (true) {
                     $dHourWorkStop,
                     $fHourInterval
                 );
-                $arrResults['data'] = $oReservationT->get($arrRequestData['date']);
-                foreach ($arrResults['data'] as &$arrData) {
-                    if ($arrData['id']) unset($arrData);
-                    
-                    $sTimeFormat = str_replace('.', ':', $arrData['hour']);
-                    $sTimeFormat .= '0';
-                    $arrData['hour'] = $sTimeFormat;
+                $arrResults['data'] = [];
+                $arrResults['data_nofilter'] = $oReservationT->get($arrRequestData['date']);
+
+                foreach ($arrResults['data_nofilter'] as &$arrData) {
+                    if (empty($arrData['hour'])) continue;
+                    if ($arrData['id']) continue;
+
+                    $bMinute = explode('.', $arrData['hour']);
+                    if (count($bMinute) > 1) {
+                        $sTimeFormat = str_replace('.', ':', $arrData['hour']);
+                        $sTimeFormat .= '0';
+                        $arrData['hour'] = $sTimeFormat;
+                    } else {
+                        $arrData['hour'] .= ':00';
+                    }
+                    $arrResults['data'][] = $arrData;
                 }
                 die(json_encode($arrResults));
                 break;
 
             case 'add': # Добавление
-                if (empty($arrRequestData)) return $arrResults['error'] = 'Not data for add';
+                // Пользователь не авторизирован, ошибка
+                $user = $modx->getUser();
+                if(!(int)$user->get('id')){
+                    http_response_code(503);
+                    $arrResults['error'] = 'Access error';
+                    die(json_encode($arrResults));
+                }
+                if (empty($arrRequestData)) {
+                    $arrResults['error'] = 'Not data for add';
+                    http_response_code(503);
+                    die(json_encode($arrResults));
+                }
 
                 $oReservationT = new ReservationT();
                 $oReservationT->date = $arrRequestData['date'];
@@ -335,7 +351,18 @@ if (true) {
                 break;
 
             case 'del': # Удаление
-                if (empty($arrRequestData)) return $arrResults['text'] = $arrResults['error'] = 'Not data for add';
+                // Пользователь не авторизирован, ошибка
+                $user = $modx->getUser();
+                if(!(int)$user->get('id')){
+                    http_response_code(503);
+                    $arrResults['error'] = 'Access error';
+                    die(json_encode($arrResults));
+                }
+                if (empty($arrRequestData)) {
+                    $arrResults['text'] = $arrResults['error'] = 'Not data for add';
+                    http_response_code(503);
+                    die(json_encode($arrResults));
+                }
 
                 $oReservationT = new ReservationT();
 
@@ -358,7 +385,7 @@ if (true) {
 
                     $sResult .= '"' . $formatted_date . '",';
                 }
-                return '[' . mb_substr($sResult, 0, -1) . ']';
+                die('[' . mb_substr($sResult, 0, -1) . ']');
                 break;
             case 'show_disabled_times': # Вывод забронированного времени
                 $sResult = '';
